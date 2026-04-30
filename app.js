@@ -237,6 +237,7 @@ let currentView = viewDefs.some((view) => `#${view.id}` === window.location.hash
 let syncStatus = "checking";
 let saveTimer;
 let accountPanelOpen = false;
+let removalRequest = null;
 
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
@@ -426,6 +427,7 @@ function render() {
       </main>
       ${renderMobileTabs()}
       ${accountPanelOpen ? renderAccountPanel() : ""}
+      ${removalRequest ? renderRemovalConfirm() : ""}
     </div>
   `;
 }
@@ -660,6 +662,28 @@ function renderAccountOption(member, index = 0) {
         <small>${escapeHtml(member.role)}</small>
       </span>
     </button>
+  `;
+}
+
+function renderRemovalConfirm() {
+  return `
+    <div class="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="remove-confirm-title">
+      <section class="confirm-card">
+        <div class="confirm-icon" aria-hidden="true">!</div>
+        <div>
+          <p class="eyebrow">Confirm removal</p>
+          <h2 id="remove-confirm-title">${escapeHtml(removalRequest.title)}</h2>
+          <p>${escapeHtml(removalRequest.message)}</p>
+          <div class="confirm-detail">${escapeHtml(removalRequest.detail)}</div>
+        </div>
+        <div class="confirm-actions">
+          <button class="btn secondary" data-action="cancel-remove" type="button">Keep it</button>
+          <button class="btn danger confirm-danger" data-action="confirm-remove" type="button">
+            ${escapeHtml(removalRequest.confirmLabel)}
+          </button>
+        </div>
+      </section>
+    </div>
   `;
 }
 
@@ -1568,11 +1592,22 @@ document.addEventListener("click", (event) => {
   if (action === "sign-out") {
     signOut();
   }
+  if (action === "cancel-remove") {
+    removalRequest = null;
+    render();
+    return;
+  }
+  if (action === "confirm-remove") {
+    confirmRemoval();
+    return;
+  }
   if (action === "remove-record") {
-    removeRecord(actionButton.dataset.collection, actionButton.dataset.id, actionButton.dataset.label);
+    requestRemoveRecord(actionButton.dataset.collection, actionButton.dataset.id, actionButton.dataset.label);
+    return;
   }
   if (action === "remove-member") {
-    removeMember(actionButton.dataset.id, actionButton.dataset.label);
+    requestRemoveMember(actionButton.dataset.id, actionButton.dataset.label);
+    return;
   }
 });
 
@@ -1647,7 +1682,7 @@ function toggleMedication(id) {
   scheduleSave("Medication reminder updated.");
 }
 
-function removeRecord(collection, id, label) {
+function requestRemoveRecord(collection, id, label) {
   const recordLabels = {
     tasks: "task",
     medications: "medication",
@@ -1662,11 +1697,22 @@ function removeRecord(collection, id, label) {
 
   const recordLabel = recordLabels[collection] || "item";
   const displayLabel = String(label || recordLabel).slice(0, 120);
-  const confirmed = window.confirm(
-    `Remove this ${recordLabel} from the shared workspace?\n\n"${displayLabel}" will be removed for everyone using this family workspace.`
-  );
+  removalRequest = {
+    type: "record",
+    collection,
+    id,
+    label: displayLabel,
+    recordLabel,
+    title: `Remove this ${recordLabel}?`,
+    message: "This will remove it from the shared workspace.",
+    detail: displayLabel,
+    confirmLabel: `Remove ${recordLabel}`
+  };
+  render();
+}
 
-  if (!confirmed) return;
+function removeRecord(collection, id, label, recordLabel = "item") {
+  if (!Array.isArray(state[collection])) return;
 
   state[collection] = state[collection].filter((item) => item.id !== id);
   scheduleSave(`${capitalize(recordLabel)} removed.`);
@@ -1734,19 +1780,46 @@ function addMember(data) {
   scheduleSave("Family member added.");
 }
 
-function removeMember(id, label) {
+function requestRemoveMember(id, label) {
   if (state.members.length <= 1) {
     showToast("Keep at least one family member in the workspace.");
     return;
   }
 
+  const displayLabel = String(label || "this person").slice(0, 120);
+  removalRequest = {
+    type: "member",
+    id,
+    label: displayLabel,
+    title: `Remove ${displayLabel}?`,
+    message: "They will no longer appear in new assignments or the group chat roster.",
+    detail: "Existing notes, messages, tasks, and logs with their name will stay for history.",
+    confirmLabel: "Remove person"
+  };
+  render();
+}
+
+function confirmRemoval() {
+  if (!removalRequest) return;
+
+  const request = removalRequest;
+  removalRequest = null;
+
+  if (request.type === "record") {
+    removeRecord(request.collection, request.id, request.label, request.recordLabel);
+    render();
+    return;
+  }
+
+  if (request.type === "member") {
+    removeMember(request.id, request.label);
+    render();
+  }
+}
+
+function removeMember(id, label) {
   const removedMember = state.members.find((member) => member.id === id);
   const displayLabel = String(label || "this person").slice(0, 120);
-  const confirmed = window.confirm(
-    `Remove ${displayLabel} from the family workspace?\n\nThey will no longer appear in new assignments or the group chat roster. Existing notes, messages, tasks, and logs with their name will stay for history.`
-  );
-
-  if (!confirmed) return;
 
   state.members = state.members.filter((member) => member.id !== id);
   state.messages.push(createSystemMessage(`${displayLabel} was removed from the family chat.`));

@@ -804,6 +804,88 @@ input:disabled {
   background: rgba(8, 9, 12, 0.55);
 }
 
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(20, 21, 24, 0.58);
+  backdrop-filter: blur(5px);
+}
+
+.confirm-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 14px;
+  width: min(100%, 480px);
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 0 24px 70px rgba(22, 19, 17, 0.28);
+  animation: confirm-in 180ms ease both;
+}
+
+:root[data-theme="dark"] .confirm-card {
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.46);
+}
+
+.confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: var(--rose);
+  color: var(--coral);
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.confirm-card h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.confirm-card p {
+  margin: 8px 0 0;
+  color: var(--soft-ink);
+  line-height: 1.45;
+}
+
+.confirm-detail {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.confirm-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.confirm-danger {
+  border-color: rgba(217, 100, 89, 0.4);
+  background: var(--coral);
+  color: #fffaf5;
+}
+
+.confirm-danger:hover {
+  background: #bf5047;
+  color: #fffaf5;
+}
+
 .modal-header {
   display: flex;
   gap: 12px;
@@ -1544,6 +1626,18 @@ input:disabled {
   }
 }
 
+@keyframes confirm-in {
+  from {
+    opacity: 0.88;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes signin-rise {
   from {
     opacity: 0.9;
@@ -1896,6 +1990,16 @@ input:disabled {
 
   .modal-header {
     display: grid;
+  }
+
+  .confirm-card {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .topbar,
