@@ -1,0 +1,22 @@
+# Browser test profiles and screenshots
+.edge-profile*/
+qa-*.png
+
+# Local runtime output
+server.log
+server.err.log
+*.log
+data/
+
+# Private planning notes
+docs/
+GITHUB_UPLOAD.md
+
+# Dependencies and local config
+node_modules/
+.env
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
