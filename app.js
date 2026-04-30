@@ -3,16 +3,19 @@ const STORAGE_KEY = `carecircle-state-v1:${workspaceId}`;
 const THEME_KEY = "carecircle-theme";
 const ACCOUNT_KEY = `carecircle-account:${workspaceId}`;
 const LEGACY_CHAT_SENDER_KEY = `carecircle-chat-sender:${workspaceId}`;
+const isServed = window.location.protocol.startsWith("http");
+const isGitHubPages = window.location.hostname.endsWith("github.io");
+const canUseServerSync = isServed && !isGitHubPages;
 
 const viewDefs = [
-  { id: "overview", label: "Today", icon: "TD", iconPath: "/assets/icons/care-circle.png?v=nav2" },
-  { id: "tasks", label: "Tasks", icon: "TS", iconPath: "/assets/icons/tasks.png?v=nav2" },
-  { id: "meds", label: "Medication", mobileLabel: "Meds", icon: "RX", iconPath: "/assets/icons/medication.png?v=nav2" },
-  { id: "appointments", label: "Appointments", icon: "AP", iconPath: "/assets/icons/appointments.png?v=nav2" },
-  { id: "notes", label: "Notes", icon: "NT", iconPath: "/assets/icons/notes.png?v=nav2" },
-  { id: "documents", label: "Documents", icon: "DC", iconPath: "/assets/icons/documents.png?v=nav2" },
-  { id: "calls", label: "Insurance Calls", icon: "IC", iconPath: "/assets/icons/insurance-calls.png?v=nav2" },
-  { id: "chat", label: "Family Chat", mobileLabel: "Chat", icon: "CH", iconPath: "/assets/icons/family-chat.png?v=nav2" },
+  { id: "overview", label: "Today", icon: "TD", iconPath: "assets/icons/care-circle.png?v=nav2" },
+  { id: "tasks", label: "Tasks", icon: "TS", iconPath: "assets/icons/tasks.png?v=nav2" },
+  { id: "meds", label: "Medication", mobileLabel: "Meds", icon: "RX", iconPath: "assets/icons/medication.png?v=nav2" },
+  { id: "appointments", label: "Appointments", icon: "AP", iconPath: "assets/icons/appointments.png?v=nav2" },
+  { id: "notes", label: "Notes", icon: "NT", iconPath: "assets/icons/notes.png?v=nav2" },
+  { id: "documents", label: "Documents", icon: "DC", iconPath: "assets/icons/documents.png?v=nav2" },
+  { id: "calls", label: "Insurance Calls", icon: "IC", iconPath: "assets/icons/insurance-calls.png?v=nav2" },
+  { id: "chat", label: "Family Chat", mobileLabel: "Chat", icon: "CH", iconPath: "assets/icons/family-chat.png?v=nav2" },
   { id: "billing", label: "Plans", icon: "$" }
 ];
 
@@ -237,7 +240,6 @@ let accountPanelOpen = false;
 
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
-const isServed = window.location.protocol.startsWith("http");
 
 applyTheme();
 init();
@@ -251,7 +253,7 @@ async function init() {
 }
 
 async function loadState() {
-  if (isServed) {
+  if (canUseServerSync) {
     try {
       const response = await fetch(apiUrl("state"), { cache: "no-store" });
       if (response.ok) {
@@ -264,7 +266,7 @@ async function loadState() {
   }
 
   const stored = window.localStorage.getItem(STORAGE_KEY);
-  syncStatus = isServed ? "offline" : "local";
+  syncStatus = canUseServerSync ? "offline" : "local";
   return stored ? normalizeState(JSON.parse(stored)) : structuredClone(defaultState);
 }
 
@@ -290,7 +292,7 @@ async function saveState(message) {
   state.meta.updatedAt = new Date().toISOString();
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
-  if (isServed) {
+  if (canUseServerSync) {
     try {
       const response = await fetch(apiUrl("state"), {
         method: "POST",
@@ -313,7 +315,7 @@ function scheduleSave(message) {
 }
 
 function connectRealtime() {
-  if (!isServed || !window.EventSource) return;
+  if (!canUseServerSync || !window.EventSource) return;
 
   const events = new EventSource(apiUrl("events"));
   events.addEventListener("open", () => {
@@ -344,7 +346,7 @@ function connectRealtime() {
 
 function registerServiceWorker() {
   if ("serviceWorker" in navigator && isServed) {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
   }
 }
 
@@ -434,7 +436,7 @@ function renderSidebar() {
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark brand-mark-image" aria-hidden="true">
-          <img src="/assets/icons/care-circle.png?v=nav2" alt="">
+          <img src="assets/icons/care-circle.png?v=nav2" alt="">
         </div>
         <div>
           <p class="brand-name"><strong>CareCircle</strong></p>
@@ -524,7 +526,7 @@ function renderAccountGate() {
         <div class="signin-intro">
           <div class="brand account-brand signin-brand">
             <div class="brand-mark brand-mark-image" aria-hidden="true">
-              <img src="/assets/icons/care-circle.png?v=nav2" alt="">
+              <img src="assets/icons/care-circle.png?v=nav2" alt="">
             </div>
             <div>
               <p class="brand-name"><strong>CareCircle</strong></p>
