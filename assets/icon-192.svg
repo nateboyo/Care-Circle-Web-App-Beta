@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-label="CareCircle icon">
+  <rect width="192" height="192" rx="40" fill="#f7efe7"/>
+  <circle cx="96" cy="92" r="58" fill="#27736a"/>
+  <path d="M96 130c-25-17-43-31-43-52 0-13 10-23 23-23 8 0 16 4 20 11 4-7 12-11 20-11 13 0 23 10 23 23 0 21-18 35-43 52Z" fill="#fffaf5"/>
+  <path d="M70 138c15 10 37 10 52 0" fill="none" stroke="#d96459" stroke-width="10" stroke-linecap="round"/>
+</svg>
