@@ -15,48 +15,16 @@ const viewDefs = [
   { id: "notes", label: "Notes", icon: "NT", iconPath: "assets/icons/notes.png?v=nav2" },
   { id: "documents", label: "Documents", icon: "DC", iconPath: "assets/icons/documents.png?v=nav2" },
   { id: "calls", label: "Insurance Calls", icon: "IC", iconPath: "assets/icons/insurance-calls.png?v=nav2" },
-  { id: "chat", label: "Family Chat", mobileLabel: "Chat", icon: "CH", iconPath: "assets/icons/family-chat.png?v=nav2" },
-  { id: "billing", label: "Plans", icon: "$" }
+  { id: "chat", label: "Family Chat", mobileLabel: "Chat", icon: "CH", iconPath: "assets/icons/family-chat.png?v=nav2" }
 ];
 
 const mobileViews = ["overview", "tasks", "meds", "chat"];
-
-const plans = {
-  free: {
-    label: "Free",
-    price: 0,
-    limit: "One elder profile, basic tasks, notes, and medication list"
-  },
-  family: {
-    label: "Family",
-    price: 12,
-    limit: "Care packet export, document list, call logs, shared chat"
-  },
-  plus: {
-    label: "Family Plus",
-    price: 24,
-    limit: "Multiple elders, advanced permissions, unlimited storage metadata"
-  },
-  pro: {
-    label: "Care Pro",
-    price: 79,
-    limit: "Client workspaces for care managers and elder-law offices"
-  }
-};
-
-const planRank = {
-  free: 0,
-  family: 1,
-  plus: 2,
-  pro: 3
-};
 
 const today = currentISODate();
 let theme = getInitialTheme();
 
 const defaultState = {
   meta: {
-    plan: "free",
     workspaceId,
     betaStage: "private-beta",
     workspaceName: "Parker Family Circle",
@@ -421,7 +389,6 @@ function render() {
           <aside class="right-rail" aria-label="Care workspace details">
             ${renderCareTeam()}
             ${renderSyncPanel()}
-            ${renderRevenuePanel()}
           </aside>
         </div>
       </main>
@@ -466,12 +433,6 @@ function renderSidebar() {
           )
           .join("")}
       </nav>
-
-      <div class="sidebar-footer">
-        <span>Current plan</span>
-        <strong>${plans[state.meta.plan].label}</strong>
-        <span>${plans[state.meta.plan].limit}</span>
-      </div>
     </aside>
   `;
 }
@@ -498,7 +459,6 @@ function renderTopbar(view) {
         ${renderAccountButton()}
         <button class="btn secondary" data-action="toggle-theme" aria-label="Toggle night mode">${theme === "dark" ? "Day" : "Night"}</button>
         <button class="btn secondary" data-action="export-care-packet" aria-label="Export care packet">Packet</button>
-        <button class="btn coral" data-view="billing">Upgrade</button>
       </div>
     </header>
   `;
@@ -743,8 +703,6 @@ function renderView(viewId) {
       return renderCalls();
     case "chat":
       return renderChat();
-    case "billing":
-      return renderBilling();
     default:
       return renderOverview();
   }
@@ -1134,7 +1092,6 @@ function renderNoteForm() {
 }
 
 function renderDocuments() {
-  const exportGated = !hasPlan("family");
   return `
     <section class="section-band">
       <div class="section-header">
@@ -1145,7 +1102,6 @@ function renderDocuments() {
         <button class="btn small secondary" data-action="export-care-packet">Export packet</button>
       </div>
       ${renderBetaNotice()}
-      ${exportGated ? renderLockPanel("Upgrade to Family to unlock care packet exports. Document upload comes after secure cloud storage is connected.") : ""}
       <div class="list">
         ${state.documents.map(renderDocumentCard).join("")}
       </div>
@@ -1361,71 +1317,6 @@ function renderFamilyMemberCard(member) {
   `;
 }
 
-function renderBilling() {
-  return `
-    <section class="section-band">
-      <div class="section-header">
-        <div>
-          <h2>Revenue path</h2>
-          <p>Start free, then charge when families need durable records, exports, storage, and professional support.</p>
-        </div>
-        <span class="pill"><strong>${plans[state.meta.plan].label}</strong> active</span>
-      </div>
-      <div class="pricing-grid">
-        ${renderPlanCard("free", ["One elder profile", "Basic tasks and notes", "Medication list"])}
-        ${renderPlanCard("family", ["Shared chat and call logs", "Care packet export", "Larger document list"], true)}
-        ${renderPlanCard("plus", ["Multiple elders", "Advanced family permissions", "Priority family support"])}
-      </div>
-    </section>
-
-    <section class="section-band">
-      <div class="split-grid">
-        <div class="callout">
-          <strong>First paid trigger</strong>
-          <p>Charge when a family needs to export a care packet for a doctor visit, emergency handoff, or new home-care helper.</p>
-        </div>
-        <div class="callout">
-          <strong>Expansion path</strong>
-          <p>Sell Care Pro to geriatric care managers, senior move managers, and elder-law offices managing many families.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-band">
-      <div class="form-panel">
-        <h3>Mock checkout settings</h3>
-        <p>These fields model what would be sent to Stripe Checkout or in-app purchase later.</p>
-        <form class="form-grid" data-form="checkout">
-          ${field("Billing email", "email", "ana@example.com", "email")}
-          ${selectField("Plan", "plan", ["family", "plus", "pro"])}
-          <div class="field full">
-            <button class="btn" type="submit">Activate selected plan</button>
-          </div>
-        </form>
-      </div>
-    </section>
-  `;
-}
-
-function renderPlanCard(planId, features, featured = false) {
-  const plan = plans[planId];
-  const active = state.meta.plan === planId;
-  return `
-    <article class="plan-card ${featured ? "featured" : ""}">
-      <div>
-        <h3>${plan.label}</h3>
-        <div class="price"><strong>$${plan.price}</strong><span>/mo</span></div>
-      </div>
-      <ul class="feature-list">
-        ${features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("")}
-      </ul>
-      <button class="btn ${active ? "secondary" : ""}" data-action="upgrade-plan" data-plan="${planId}" ${active ? "disabled" : ""}>
-        ${active ? "Current plan" : plan.price === 0 ? "Use free" : `Choose ${plan.label}`}
-      </button>
-    </article>
-  `;
-}
-
 function renderCareTeam() {
   return `
     <section class="rail-panel">
@@ -1466,32 +1357,6 @@ function renderSyncPanel() {
         <button class="btn small secondary" data-action="copy-invite">Copy invite link</button>
       </div>
     </section>
-  `;
-}
-
-function renderRevenuePanel() {
-  return `
-    <section class="rail-panel">
-      <h3>Why families pay</h3>
-      <p>The paid tier is not for another chat app. It is for record-keeping that survives stress.</p>
-      <ul class="feature-list" style="margin-top: 14px;">
-        <li>Emergency care packet export</li>
-        <li>Shared document list</li>
-        <li>Insurance call history</li>
-        <li>Professional multi-family plan</li>
-      </ul>
-    </section>
-  `;
-}
-
-function renderLockPanel(message) {
-  return `
-    <div class="lock-panel">
-      <strong>${escapeHtml(message)}</strong>
-      <div class="button-row">
-        <button class="btn small coral" data-view="billing">View plans</button>
-      </div>
-    </div>
   `;
 }
 
@@ -1566,9 +1431,6 @@ document.addEventListener("click", (event) => {
   if (action === "toggle-med") {
     toggleMedication(actionButton.dataset.id);
   }
-  if (action === "upgrade-plan") {
-    upgradePlan(actionButton.dataset.plan);
-  }
   if (action === "export-care-packet") {
     exportCarePacket();
   }
@@ -1633,7 +1495,6 @@ document.addEventListener("submit", (event) => {
   if (kind === "message") addMessage(data);
   if (kind === "member") addMember(data);
   if (kind === "account") createAccount(data);
-  if (kind === "checkout") upgradePlan(data.plan, data.email);
 });
 
 function setView(viewId) {
@@ -1928,19 +1789,7 @@ function createSystemMessage(body) {
   };
 }
 
-function upgradePlan(planId, email = "") {
-  state.meta.plan = planId;
-  state.meta.billingEmail = email;
-  scheduleSave(`${plans[planId].label} plan activated.`);
-}
-
 function exportCarePacket() {
-  if (!hasPlan("family")) {
-    showToast("Care packet export is a paid Family feature.");
-    setView("billing");
-    return;
-  }
-
   const pdf = buildCarePacketPdf();
   const blob = new Blob([pdf], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
@@ -2218,10 +2067,6 @@ function getInitialTheme() {
   return stored === "dark" ? "dark" : "light";
 }
 
-function hasPlan(planId) {
-  return planRank[state.meta.plan] >= planRank[planId];
-}
-
 function getCurrentView() {
   return viewDefs.find((view) => view.id === currentView) || viewDefs[0];
 }
@@ -2235,8 +2080,7 @@ function viewDescription(viewId) {
     notes: "Shared observations for symptoms, meals, mood, safety, and daily changes.",
     documents: "A simple index for the files families always need at the worst moment.",
     calls: "Insurance call logs with reference numbers and next actions.",
-    chat: "A focused family thread attached to the care workspace.",
-    billing: "Subscription tiers, paid triggers, and the first monetization path."
+    chat: "A focused family thread attached to the care workspace."
   };
   return descriptions[viewId] || descriptions.overview;
 }
