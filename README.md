@@ -35,6 +35,24 @@ Caregiving often becomes scattered across text messages, paper notes, phone call
 - Server-sent events for local realtime updates
 - PWA manifest and service worker
 
+## Screenshots
+
+| Responsive Sign-In | Daily Care Dashboard |
+| --- | --- |
+| ![Responsive sign-in screen](assets/screenshots/sign-in.png) | ![Daily care dashboard](assets/screenshots/dashboard.png) |
+
+| Task Delegation | Medication Schedule |
+| --- | --- |
+| ![Task delegation board](assets/screenshots/tasks1.png) | ![Medication schedule sorted by time](assets/screenshots/medication.png) |
+
+| Family Group Chat | Document Records And Care Packet |
+| --- | --- |
+| ![Family group chat](assets/screenshots/chat.png) | ![Document records and care packet export](assets/screenshots/documents.png) |
+
+| Mobile Dark Mode | Removal Confirmation |
+| --- | --- |
+| ![Mobile dark mode layout](assets/screenshots/mobile-dark.png) | ![Custom removal confirmation modal](assets/screenshots/removal-confirmation.png) |
+
 ## Project Status
 
 This is a portfolio prototype, not a production medical or clinical system. The current version demonstrates the full product flow and interface. A production version would need real authentication, user permissions, secure cloud storage, and a production database.
