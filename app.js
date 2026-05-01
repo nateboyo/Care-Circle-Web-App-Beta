@@ -479,11 +479,7 @@ function renderAccountButton() {
 function renderAccountGate() {
   return `
     <main class="account-screen">
-      <div class="signin-backdrop" aria-hidden="true">
-        <span class="signin-line signin-line-one"></span>
-        <span class="signin-line signin-line-two"></span>
-        <span class="signin-line signin-line-three"></span>
-      </div>
+      <div class="signin-backdrop" aria-hidden="true"></div>
       <section class="signin-shell" aria-label="CareCircle sign in">
         <div class="signin-intro">
           <div class="brand account-brand signin-brand">
