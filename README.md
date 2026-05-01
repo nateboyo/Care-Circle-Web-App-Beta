@@ -39,19 +39,19 @@ Caregiving often becomes scattered across text messages, paper notes, phone call
 
 | Responsive Sign-In | Daily Care Dashboard |
 | --- | --- |
-| ![Responsive sign-in screen](assets/screenshots/sign-in.png) | ![Daily care dashboard](assets/screenshots/dashboard.png) |
+| ![Responsive sign-in screen](assets/sign-in.png) | ![Daily care dashboard](assets/dashboard.png) |
 
 | Task Delegation | Medication Schedule |
 | --- | --- |
-| ![Task delegation board](assets/screenshots/tasks1.png) | ![Medication schedule sorted by time](assets/screenshots/medication.png) |
+| ![Task delegation board](assets/tasks1.png) | ![Medication schedule sorted by time](assets/medication.png) |
 
 | Family Group Chat | Document Records And Care Packet |
 | --- | --- |
-| ![Family group chat](assets/screenshots/chat.png) | ![Document records and care packet export](assets/screenshots/documents.png) |
+| ![Family group chat](assets/chat.png) | ![Document records and care packet export](assets/documents.png) |
 
 | Mobile Dark Mode | Removal Confirmation |
 | --- | --- |
-| ![Mobile dark mode layout](assets/screenshots/mobile-dark.png) | ![Custom removal confirmation modal](assets/screenshots/removal-confirmation.png) |
+| ![Mobile dark mode layout](assets/mobile-dark.png) | ![Custom removal confirmation modal](assets/removal-confirmation.png) |
 
 ## Project Status
 
